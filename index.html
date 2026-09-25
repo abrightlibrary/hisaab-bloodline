@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HISAAB | Free Fire Scrims</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#07090d;color:#f4f7fb;font-family:Inter,system-ui,Arial,sans-serif}button,input{font:inherit}button{cursor:pointer}
+:root{--p:#0e1219;--p2:#141a23;--b:#252d39;--m:#8c97a8;--a:#24dfa0;--d:#ff5d6c}
+.hidden{display:none!important}.app{min-height:100vh}.login{min-height:100vh;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at top,#10251f 0,#07090d 45%)}.loginbox{width:min(420px,100%);background:var(--p);border:1px solid var(--b);border-radius:18px;padding:28px}.brand{font-size:30px;font-weight:900;letter-spacing:3px}.brand span{color:var(--a)}.muted{color:var(--m);font-size:13px}.field{margin:14px 0}.field label{display:block;color:var(--m);font-size:11px;margin-bottom:6px}.field input{width:100%;padding:12px;background:#090d13;color:white;border:1px solid var(--b);border-radius:9px;outline:0}.field input:focus{border-color:var(--a)}
+.primary{background:var(--a);color:#06110d;border:0;padding:11px 16px;border-radius:9px;font-weight:850}.secondary{background:var(--p2);color:white;border:1px solid var(--b);padding:10px 14px;border-radius:9px}.danger{color:var(--d)}
+.layout{display:flex;min-height:100vh}.side{position:fixed;left:0;top:0;bottom:0;width:230px;background:#090c11;border-right:1px solid var(--b);padding:24px 14px}.nav{margin-top:25px}.nav button{display:block;width:100%;background:none;color:var(--m);border:0;text-align:left;padding:12px;border-radius:9px;margin:3px 0}.nav button.active,.nav button:hover{background:var(--p2);color:#fff}.logout{position:absolute;bottom:20px;left:14px;right:14px}
+.main{margin-left:230px;width:calc(100% - 230px);padding:28px;max-width:1500px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}h1{margin:0;font-size:27px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card,.panel{background:var(--p);border:1px solid var(--b);border-radius:13px;padding:18px}.label{font-size:11px;color:var(--m);margin-bottom:8px}.value{font-size:25px;font-weight:850}.profit{color:var(--a)}.loss{color:var(--d)}.grid{display:grid;grid-template-columns:1.4fr .8fr;gap:18px;margin-top:18px}.page{display:none}.page.active{display:block}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.full{grid-column:1/-1}.actions{display:flex;gap:8px;margin-top:16px}.calc{margin-top:15px;padding:14px;border:1px solid #174333;background:#091411;border-radius:10px;display:flex;justify-content:space-between}.tablewrap{overflow:auto}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{padding:11px 8px;border-bottom:1px solid var(--b);text-align:left;white-space:nowrap}.table th{font-size:10px;color:var(--m)}.filters{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}.filters input{background:#090d13;color:white;border:1px solid var(--b);border-radius:8px;padding:9px}.empty{text-align:center;color:var(--m);padding:30px}.error{color:var(--d);font-size:13px;margin-top:10px}.userbar{font-size:12px;color:var(--m);margin-bottom:20px}
+@media(max-width:850px){.side{position:sticky;width:100%;height:auto;display:flex;padding:10px;align-items:center;z-index:5}.layout{display:block}.main{margin:0;width:100%;padding:17px}.brand{font-size:20px}.side .muted{display:none}.nav{margin:0;display:flex;overflow:auto}.nav button{white-space:nowrap;width:auto}.logout{position:static;margin-left:auto}.cards{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}}
+@media(max-width:500px){.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.cards{grid-template-columns:1fr 1fr}.top h1{font-size:22px}}
+</style>
+</head>
+<body>
+
+<div id="loginScreen" class="login">
+  <div class="loginbox">
+    <div class="brand">HIS<span>AAB</span></div>
+    <p class="muted">Free Fire Paid Scrims — Shared Hisaab</p>
+    <div class="field"><label>YOUR NAME</label><input id="loginName" placeholder="e.g. Dev" autocomplete="name"></div>
+    <div class="field"><label>EMAIL</label><input id="loginEmail" type="email" placeholder="Email"></div>
+    <div class="field"><label>PASSWORD</label><input id="loginPassword" type="password" placeholder="Password"></div>
+    <button id="loginBtn" class="primary" style="width:100%">Login</button>
+    <div id="loginError" class="error"></div>
+  </div>
+</div>
+
+<div id="app" class="app hidden">
+<div class="layout">
+<aside class="side">
+  <div><div class="brand">HIS<span>AAB</span></div><div class="muted">FREE FIRE SCRIMS</div></div>
+  <nav class="nav">
+    <button class="active" data-page="dashboard">Dashboard</button>
+    <button data-page="add">+ Add Hisaab</button>
+    <button data-page="history">History</button>
+    <button data-page="reports">Reports</button>
+  </nav>
+  <button id="logoutBtn" class="secondary logout">Logout</button>
+</aside>
+<main class="main">
+<div class="userbar">Logged in as <b id="currentUserName"></b> · <span id="syncStatus">Online</span></div>
+
+<section id="dashboard" class="page active">
+<div class="top"><div><h1>Overall Hisaab</h1><div class="muted">All staff • all recorded scrims</div></div><button class="primary" onclick="showPage('add')">+ Add Hisaab</button></div>
+<div class="cards">
+<div class="card"><div class="label">TOTAL COLLECTION</div><div class="value" id="allCollection">₹0</div></div>
+<div class="card"><div class="label">TOTAL EXPENSES</div><div class="value" id="allExpense">₹0</div></div>
+<div class="card"><div class="label">NET PROFIT</div><div class="value profit" id="allProfit">₹0</div></div>
+<div class="card"><div class="label">TOTAL LOBBIES</div><div class="value" id="allMatches">0</div></div>
+</div>
+<div class="grid"><div class="panel"><h2>Recent Hisaab</h2><div id="recentTable"></div></div><div class="panel"><h2>Staff-wise</h2><div id="staffSummary"></div></div></div>
+</section>
+
+<section id="add" class="page">
+<div class="top"><div><h1 id="formTitle">Add Hisaab</h1><div class="muted">This entry will be shared with all logged-in staff.</div></div></div>
+<div class="panel"><form id="form">
+<input type="hidden" id="editId">
+<div class="formgrid">
+<div class="field"><label>DATE</label><input id="date" type="date" required></div>
+<div class="field"><label>TIME</label><input id="time" type="time" required></div>
+<div class="field full"><label>LOBBY / MATCH NAME</label><input id="match" required placeholder="12 PM Lobby"></div>
+<div class="field"><label>TOTAL SLOTS</label><input id="slots" type="number" min="0"></div>
+<div class="field"><label>ENTRY FEE (₹)</label><input id="entry" type="number" min="0"></div>
+<div class="field"><label>COLLECTION (₹)</label><input id="collection" type="number" min="0" required></div>
+<div class="field"><label>PRIZE / PAYOUT (₹)</label><input id="prize" type="number" min="0" value="0"></div>
+<div class="field"><label>HOST EXPENSE (₹)</label><input id="host" type="number" min="0" value="0"></div>
+<div class="field"><label>PT MAKER EXPENSE (₹)</label><input id="pt" type="number" min="0" value="0"></div>
+<div class="field"><label>OTHER EXPENSE (₹)</label><input id="other" type="number" min="0" value="0"></div>
+<div class="field full"><label>NOTE</label><input id="note" placeholder="Optional"></div>
+</div>
+<div class="calc"><span>NET PROFIT</span><b class="profit" id="liveProfit">₹0</b></div>
+<div class="actions"><button class="primary" type="submit" id="saveBtn">Save Hisaab</button><button type="button" class="secondary" onclick="resetForm()">Clear</button></div>
+<div id="formError" class="error"></div>
+</form></div>
+</section>
+
+<section id="history" class="page">
+<div class="top"><div><h1>Hisaab History</h1><div class="muted">Every entry shows who added it.</div></div></div>
+<div class="panel"><div class="filters"><input id="filterDate" type="date"><input id="filterMonth" type="month"><input id="search" placeholder="Search lobby or staff"><button class="secondary" onclick="clearFilters()">Clear</button></div><div id="historyTable"></div></div>
+</section>
+
+<section id="reports" class="page">
+<div class="top"><div><h1>Monthly Report</h1><div class="muted">Overall performance by month.</div></div></div>
+<div class="panel"><div class="filters"><input id="reportMonth" type="month"></div><div class="cards"><div class="card"><div class="label">COLLECTION</div><div class="value" id="rCollection">₹0</div></div><div class="card"><div class="label">EXPENSES</div><div class="value" id="rExpense">₹0</div></div><div class="card"><div class="label">PROFIT</div><div class="value profit" id="rProfit">₹0</div></div><div class="card"><div class="label">LOBBIES</div><div class="value" id="rMatches">0</div></div></div><div id="rStaff" style="margin-top:20px"></div></div>
+</section>
+</main></div></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDoc, setDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+const firebaseConfig={
+ apiKey:"AIzaSyClHhiCOCmjG-vJ-mhfOCxa3HRDI7rObPs",
+ authDomain:"new-hisaab.firebaseapp.com",
+ projectId:"new-hisaab",
+ storageBucket:"new-hisaab.firebasestorage.app",
+ messagingSenderId:"172695570749",
+ appId:"1:172695570749:web:8265c5752ce822b6b4dd54"
+};
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
+let rows=[],unsubscribe=null,currentName="";
+const $=id=>document.getElementById(id), money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{maximumFractionDigits:2});
+const today=()=>new Date().toISOString().slice(0,10);
+const expense=x=>+x.prize+(+x.host)+(+x.pt)+(+x.other);
+const profit=x=>+x.collection-expense(x);
+const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+
+function showPage(p){document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));$(p).classList.add("active");document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===p));if(p==="dashboard")renderDashboard();if(p==="history")renderHistory();if(p==="reports")renderReport();}
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>showPage(b.dataset.page));
+
+$("loginBtn").onclick=async()=>{
+ $("loginError").textContent="";
+ const name=$("loginName").value.trim(),email=$("loginEmail").value.trim(),pass=$("loginPassword").value;
+ if(!name||!email||!pass){$("loginError").textContent="Enter name, email and password.";return}
+ try{
+   const cred=await signInWithEmailAndPassword(auth,email,pass);
+   await setDoc(doc(db,"users",cred.user.uid),{
+     name, email:cred.user.email||email, updatedAt:Date.now()
+   },{merge:true});
+   localStorage.setItem("hisaab_name_"+email,name);
+ }catch(e){
+   $("loginError").textContent=e.code==="auth/invalid-credential"?"Invalid email or password.":e.message
+ }
+};
+$("logoutBtn").onclick=()=>signOut(auth);
+
+onAuthStateChanged(auth,async user=>{
+ if(unsubscribe){unsubscribe();unsubscribe=null}
+ if(!user){$("loginScreen").classList.remove("hidden");$("app").classList.add("hidden");return}
+ try{
+   const profile=await getDoc(doc(db,"users",user.uid));
+   currentName=profile.exists()&&profile.data().name
+     ? profile.data().name
+     : (localStorage.getItem("hisaab_name_"+user.email)||user.email.split("@")[0]);
+   await setDoc(doc(db,"users",user.uid),{
+     name:currentName,email:user.email||"",updatedAt:Date.now()
+   },{merge:true});
+ }catch(e){
+   currentName=localStorage.getItem("hisaab_name_"+user.email)||user.email.split("@")[0];
+   console.error(e);
+ }
+ $("currentUserName").textContent=currentName;
+ $("loginScreen").classList.add("hidden");$("app").classList.remove("hidden");
+ $("syncStatus").textContent="Live sync";
+ const q=query(collection(db,"scrims"),orderBy("createdAt","desc"));
+ unsubscribe=onSnapshot(q,snap=>{rows=snap.docs.map(d=>({id:d.id,...d.data()}));renderDashboard();renderHistory();renderReport()},err=>{$("syncStatus").textContent="Sync error";console.error(err)});
+});
+
+function resetForm(){ $("form").reset();$("editId").value="";$("formTitle").textContent="Add Hisaab";$("saveBtn").textContent="Save Hisaab";$("date").value=today();$("time").value=new Date().toTimeString().slice(0,5);$("formError").textContent="";live() }
+function live(){const p=(+$("collection").value||0)-((+$("prize").value||0)+(+$("host").value||0)+(+$("pt").value||0)+(+$("other").value||0));$("liveProfit").textContent=money(p);$("liveProfit").className=p>=0?"profit":"loss"}
+["collection","prize","host","pt","other"].forEach(i=>$(i).addEventListener("input",live));
+$("form").onsubmit=async e=>{
+ e.preventDefault();$("formError").textContent="";
+ const id=$("editId").value;
+ const base={date:$("date").value,time:$("time").value,match:$("match").value.trim(),slots:+$("slots").value||0,entry:+$("entry").value||0,collection:+$("collection").value||0,prize:+$("prize").value||0,host:+$("host").value||0,pt:+$("pt").value||0,other:+$("other").value||0,note:$("note").value.trim(),updatedAt:Date.now()};
+ try{
+   if(id){
+     // Keep the original creator permanently attached to the entry.
+     const existing=rows.find(x=>x.id===id);
+     await updateDoc(doc(db,"scrims",id),{
+       ...base,
+       addedBy:existing?.addedBy||currentName,
+       addedByUid:existing?.addedByUid||auth.currentUser.uid,
+       addedByEmail:existing?.addedByEmail||auth.currentUser.email||""
+     });
+   }else{
+     await addDoc(collection(db,"scrims"),{
+       ...base,
+       createdAt:Date.now(),
+       addedBy:currentName,
+       addedByUid:auth.currentUser.uid,
+       addedByEmail:auth.currentUser.email||""
+     });
+   }
+   resetForm();showPage("history")
+ }catch(err){$("formError").textContent=err.message}
+};
+
+function renderDashboard(){
+ const c=rows.reduce((s,x)=>s+x.collection,0),e=rows.reduce((s,x)=>s+expense(x),0);$("allCollection").textContent=money(c);$("allExpense").textContent=money(e);$("allProfit").textContent=money(c-e);$("allMatches").textContent=rows.length;
+ const recent=rows.slice(0,12);$("recentTable").innerHTML=recent.length?`<div class="tablewrap"><table class="table"><tr><th>DATE</th><th>LOBBY</th><th>ADDED BY</th><th>COLLECTION</th><th>PROFIT</th></tr>${recent.map(x=>`<tr><td>${x.date}</td><td>${esc(x.match)}</td><td>${esc(x.addedBy)}</td><td>${money(x.collection)}</td><td class="${profit(x)>=0?"profit":"loss"}">${money(profit(x))}</td></tr>`).join("")}</table></div>`:'<div class="empty">No Hisaab yet.</div>';
+ const m={};rows.forEach(x=>{const k=x.addedBy||"Unknown";m[k]??={n:0,c:0,e:0};m[k].n++;m[k].c+=x.collection;m[k].e+=expense(x)});$("staffSummary").innerHTML=Object.keys(m).length?Object.entries(m).sort((a,b)=>b[1].c-a[1].c).map(([k,v])=>`<div style="padding:11px 0;border-bottom:1px solid var(--b)"><b>${esc(k)}</b><div class="muted">${v.n} entries · ${money(v.c)} collection · <span class="profit">${money(v.c-v.e)} profit</span></div></div>`).join(""):'<div class="empty">No staff data.</div>';
+}
+function renderHistory(){
+ let r=[...rows],d=$("filterDate").value,m=$("filterMonth").value,q=$("search").value.toLowerCase().trim();if(d)r=r.filter(x=>x.date===d);if(m)r=r.filter(x=>x.date.startsWith(m));if(q)r=r.filter(x=>(x.match+" "+x.addedBy).toLowerCase().includes(q));
+ $("historyTable").innerHTML=r.length?`<div class="tablewrap"><table class="table"><tr><th>DATE</th><th>TIME</th><th>LOBBY</th><th>ADDED BY</th><th>COLLECTION</th><th>EXPENSE</th><th>PROFIT</th><th>ACTION</th></tr>${r.map(x=>`<tr><td>${x.date}</td><td>${x.time}</td><td>${esc(x.match)}</td><td>${esc(x.addedBy)}</td><td>${money(x.collection)}</td><td>${money(expense(x))}</td><td class="${profit(x)>=0?"profit":"loss"}">${money(profit(x))}</td><td><button class="secondary" onclick="window.editH('${x.id}')">Edit</button> <button class="secondary danger" onclick="window.delH('${x.id}')">Delete</button></td></tr>`).join("")}</table></div>`:'<div class="empty">No matching records.</div>';
+}
+["filterDate","filterMonth","search"].forEach(i=>$(i).addEventListener("input",renderHistory));
+window.clearFilters=()=>{$("filterDate").value="";$("filterMonth").value="";$("search").value="";renderHistory()};
+window.editH=id=>{const x=rows.find(a=>a.id===id);if(!x)return;$("editId").value=x.id;["date","time","match","slots","entry","collection","prize","host","pt","other","note"].forEach(k=>$(k).value=x[k]??"");$("formTitle").textContent="Edit Hisaab";$("saveBtn").textContent="Update Hisaab";live();showPage("add")};
+window.delH=async id=>{if(confirm("Delete this Hisaab entry?"))try{await deleteDoc(doc(db,"scrims",id))}catch(e){alert(e.message)}};
+
+function renderReport(){
+ const m=$("reportMonth").value||today().slice(0,7),r=rows.filter(x=>x.date.startsWith(m)),c=r.reduce((s,x)=>s+x.collection,0),e=r.reduce((s,x)=>s+expense(x),0);$("rCollection").textContent=money(c);$("rExpense").textContent=money(e);$("rProfit").textContent=money(c-e);$("rMatches").textContent=r.length;
+ const s={};r.forEach(x=>{const k=x.addedBy||"Unknown";s[k]??={c:0,e:0,n:0};s[k].c+=x.collection;s[k].e+=expense(x);s[k].n++});$("rStaff").innerHTML='<h3>Staff-wise report</h3>'+Object.entries(s).map(([k,v])=>`<div style="padding:11px 0;border-bottom:1px solid var(--b)"><b>${esc(k)}</b><div class="muted">${v.n} entries · Collection ${money(v.c)} · Expenses ${money(v.e)} · Profit <span class="profit">${money(v.c-v.e)}</span></div></div>`).join("");
+}
+$("reportMonth").addEventListener("input",renderReport);
+resetForm();
+</script>
+</body>
+</html>
