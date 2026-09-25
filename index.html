@@ -85,25 +85,17 @@
 </section>
 
 <section id="account" class="page">
-<div class="top"><div><h1>My Account</h1><div class="muted">Your profile, wallet and personal transaction history.</div></div></div>
-<div class="grid">
-  <div class="panel">
-    <h2>Profile</h2>
-    <div class="field"><label>NAME</label><input id="profileName"></div>
-    <div class="field"><label>EMAIL</label><input id="profileEmail" type="email" disabled></div>
-    <div class="actions"><button class="primary" id="saveProfileBtn">Save Profile</button></div>
-    <div id="profileError" class="error"></div>
-  </div>
-  <div class="panel">
-    <h2>Wallet</h2>
-    <div class="label">CURRENT BALANCE</div>
-    <div class="value profit" id="walletBalance">₹0</div>
-    <div class="muted" style="margin-top:8px">Wallet is calculated from your transaction ledger.</div>
-  </div>
+<div class="top"><div><h1>My Account</h1><div class="muted">Your profile and scrims uploaded by you.</div></div></div>
+<div class="panel">
+  <h2>Profile</h2>
+  <div class="field"><label>NAME</label><input id="profileName"></div>
+  <div class="field"><label>EMAIL</label><input id="profileEmail" type="email" disabled></div>
+  <div class="actions"><button class="primary" id="saveProfileBtn">Save Profile</button></div>
+  <div id="profileError" class="error"></div>
 </div>
 <div class="panel" style="margin-top:18px">
-  <h2>My Transactions</h2>
-  <div id="myTransactions"></div>
+  <h2>My Uploaded Scrims</h2>
+  <div id="myScrims"></div>
 </div>
 </section>
 
@@ -127,7 +119,7 @@ const firebaseConfig={
  appId:"1:172695570749:web:8265c5752ce822b6b4dd54"
 };
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
-let rows=[],unsubscribe=null,currentName="",currentProfile=null,unsubscribeTx=null,unsubscribeProfile=null;
+let rows=[],unsubscribe=null,currentName="";
 const $=id=>document.getElementById(id), money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{maximumFractionDigits:2});
 const today=()=>new Date().toISOString().slice(0,10);
 const expense=x=>+x.prize+(+x.host)+(+x.pt)+(+x.other);
@@ -172,17 +164,36 @@ onAuthStateChanged(auth,async user=>{
  $("loginScreen").classList.add("hidden");$("app").classList.remove("hidden");
  $("syncStatus").textContent="Live sync";
  const q=query(collection(db,"scrims"),orderBy("createdAt","desc"));
- unsubscribe=onSnapshot(q,snap=>{rows=snap.docs.map(d=>({id:d.id,...d.data()}));renderDashboard();renderHistory();renderReport()},err=>{$("syncStatus").textContent="Sync error";console.error(err)});
+ unsubscribe=onSnapshot(q,snap=>{
+  rows=snap.docs.map(d=>({id:d.id,...d.data()}));
+  renderDashboard();
+  renderHistory();
+  renderReport();
+  if($("account").classList.contains("active")) renderAccount();
+},err=>{$("syncStatus").textContent="Sync error";console.error(err)});
 });
 
 
 function renderAccount(){
   $("profileName").value=currentName||"";
   $("profileEmail").value=auth.currentUser?.email||"";
-  const balance=Number(currentProfile?.walletBalance||0);
-  $("walletBalance").textContent=money(balance);
-  const tx=currentProfile?.transactions||[];
-  $("myTransactions").innerHTML=tx.length?`<div class="tablewrap"><table class="table"><tr><th>DATE</th><th>TYPE</th><th>DESCRIPTION</th><th>AMOUNT</th></tr>${tx.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).map(t=>`<tr><td>${esc(t.date||"")}</td><td>${esc(t.type||"")}</td><td>${esc(t.description||"")}</td><td class="${Number(t.amount||0)>=0?"profit":"loss"}">${money(t.amount||0)}</td></tr>`).join("")}</table></div>`:'<div class="empty">No wallet transactions yet.</div>';
+
+  const uid=auth.currentUser?.uid||"";
+  const mine=rows.filter(x=>x.addedByUid===uid);
+
+  $("myScrims").innerHTML=mine.length
+    ? `<div class="tablewrap"><table class="table">
+        <tr><th>DATE</th><th>TIME</th><th>LOBBY</th><th>COLLECTION</th><th>EXPENSE</th><th>PROFIT</th></tr>
+        ${mine.map(x=>`<tr>
+          <td>${esc(x.date)}</td>
+          <td>${esc(x.time)}</td>
+          <td>${esc(x.match)}</td>
+          <td>${money(x.collection)}</td>
+          <td>${money(expense(x))}</td>
+          <td class="${profit(x)>=0?"profit":"loss"}">${money(profit(x))}</td>
+        </tr>`).join("")}
+      </table></div>`
+    : '<div class="empty">You have not uploaded any scrims yet.</div>';
 }
 $("saveProfileBtn").onclick=async()=>{
   $("profileError").textContent="";
