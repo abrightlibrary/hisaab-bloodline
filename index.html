@@ -38,6 +38,7 @@
     <button data-page="add">+ Add Hisaab</button>
     <button data-page="history">History</button>
     <button data-page="reports">Reports</button>
+    <button data-page="account">My Account</button>
   </nav>
   <button id="logoutBtn" class="secondary logout">Logout</button>
 </aside>
@@ -83,6 +84,29 @@
 <div class="panel"><div class="filters"><input id="filterDate" type="date"><input id="filterMonth" type="month"><input id="search" placeholder="Search lobby or staff"><button class="secondary" onclick="clearFilters()">Clear</button></div><div id="historyTable"></div></div>
 </section>
 
+<section id="account" class="page">
+<div class="top"><div><h1>My Account</h1><div class="muted">Your profile, wallet and personal transaction history.</div></div></div>
+<div class="grid">
+  <div class="panel">
+    <h2>Profile</h2>
+    <div class="field"><label>NAME</label><input id="profileName"></div>
+    <div class="field"><label>EMAIL</label><input id="profileEmail" type="email" disabled></div>
+    <div class="actions"><button class="primary" id="saveProfileBtn">Save Profile</button></div>
+    <div id="profileError" class="error"></div>
+  </div>
+  <div class="panel">
+    <h2>Wallet</h2>
+    <div class="label">CURRENT BALANCE</div>
+    <div class="value profit" id="walletBalance">₹0</div>
+    <div class="muted" style="margin-top:8px">Wallet is calculated from your transaction ledger.</div>
+  </div>
+</div>
+<div class="panel" style="margin-top:18px">
+  <h2>My Transactions</h2>
+  <div id="myTransactions"></div>
+</div>
+</section>
+
 <section id="reports" class="page">
 <div class="top"><div><h1>Monthly Report</h1><div class="muted">Overall performance by month.</div></div></div>
 <div class="panel"><div class="filters"><input id="reportMonth" type="month"></div><div class="cards"><div class="card"><div class="label">COLLECTION</div><div class="value" id="rCollection">₹0</div></div><div class="card"><div class="label">EXPENSES</div><div class="value" id="rExpense">₹0</div></div><div class="card"><div class="label">PROFIT</div><div class="value profit" id="rProfit">₹0</div></div><div class="card"><div class="label">LOBBIES</div><div class="value" id="rMatches">0</div></div></div><div id="rStaff" style="margin-top:20px"></div></div>
@@ -103,14 +127,14 @@ const firebaseConfig={
  appId:"1:172695570749:web:8265c5752ce822b6b4dd54"
 };
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
-let rows=[],unsubscribe=null,currentName="";
+let rows=[],unsubscribe=null,currentName="",currentProfile=null,unsubscribeTx=null,unsubscribeProfile=null;
 const $=id=>document.getElementById(id), money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{maximumFractionDigits:2});
 const today=()=>new Date().toISOString().slice(0,10);
 const expense=x=>+x.prize+(+x.host)+(+x.pt)+(+x.other);
 const profit=x=>+x.collection-expense(x);
 const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 
-function showPage(p){document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));$(p).classList.add("active");document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===p));if(p==="dashboard")renderDashboard();if(p==="history")renderHistory();if(p==="reports")renderReport();}
+function showPage(p){document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));$(p).classList.add("active");document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===p));if(p==="dashboard")renderDashboard();if(p==="history")renderHistory();if(p==="reports")renderReport();if(p==="account")renderAccount();}
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>showPage(b.dataset.page));
 
 $("loginBtn").onclick=async()=>{
@@ -150,6 +174,28 @@ onAuthStateChanged(auth,async user=>{
  const q=query(collection(db,"scrims"),orderBy("createdAt","desc"));
  unsubscribe=onSnapshot(q,snap=>{rows=snap.docs.map(d=>({id:d.id,...d.data()}));renderDashboard();renderHistory();renderReport()},err=>{$("syncStatus").textContent="Sync error";console.error(err)});
 });
+
+
+function renderAccount(){
+  $("profileName").value=currentName||"";
+  $("profileEmail").value=auth.currentUser?.email||"";
+  const balance=Number(currentProfile?.walletBalance||0);
+  $("walletBalance").textContent=money(balance);
+  const tx=currentProfile?.transactions||[];
+  $("myTransactions").innerHTML=tx.length?`<div class="tablewrap"><table class="table"><tr><th>DATE</th><th>TYPE</th><th>DESCRIPTION</th><th>AMOUNT</th></tr>${tx.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).map(t=>`<tr><td>${esc(t.date||"")}</td><td>${esc(t.type||"")}</td><td>${esc(t.description||"")}</td><td class="${Number(t.amount||0)>=0?"profit":"loss"}">${money(t.amount||0)}</td></tr>`).join("")}</table></div>`:'<div class="empty">No wallet transactions yet.</div>';
+}
+$("saveProfileBtn").onclick=async()=>{
+  $("profileError").textContent="";
+  const name=$("profileName").value.trim();
+  if(!name){$("profileError").textContent="Enter your name.";return}
+  try{
+    await updateDoc(doc(db,"users",auth.currentUser.uid),{name,updatedAt:Date.now()});
+    currentName=name;
+    $("currentUserName").textContent=name;
+    localStorage.setItem("hisaab_name_"+auth.currentUser.email,name);
+    renderAccount();
+  }catch(e){$("profileError").textContent=e.message}
+};
 
 function resetForm(){ $("form").reset();$("editId").value="";$("formTitle").textContent="Add Hisaab";$("saveBtn").textContent="Save Hisaab";$("date").value=today();$("time").value=new Date().toTimeString().slice(0,5);$("formError").textContent="";live() }
 function live(){const p=(+$("collection").value||0)-((+$("prize").value||0)+(+$("host").value||0)+(+$("pt").value||0)+(+$("other").value||0));$("liveProfit").textContent=money(p);$("liveProfit").className=p>=0?"profit":"loss"}
