@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HISAAB | Free Fire Scrims</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090d;--panel:#0e1219;--panel2:#131923;--border:#222b38;
+  --text:#f4f7fb;--muted:#8d98a8;--accent:#25e0a1;--danger:#ff5d6c;--warning:#ffc857;
+}
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+button,input,select{font:inherit}
+.app{display:flex;min-height:100vh}
+.sidebar{width:235px;background:#090c11;border-right:1px solid var(--border);padding:24px 14px;position:fixed;inset:0 auto 0 0;z-index:5}
+.logo{font-size:24px;font-weight:900;letter-spacing:2px;padding:4px 10px 3px}
+.logo span{color:var(--accent)}
+.tag{font-size:10px;color:var(--muted);letter-spacing:1.5px;padding:0 10px 28px}
+.nav button{display:block;width:100%;border:0;background:transparent;color:var(--muted);text-align:left;padding:13px 12px;border-radius:10px;margin:3px 0;cursor:pointer;font-weight:650}
+.nav button:hover,.nav button.active{background:var(--panel2);color:var(--text)}
+.main{margin-left:235px;width:calc(100% - 235px);padding:28px;max-width:1500px}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:25px}
+h1{font-size:28px}.subtitle{color:var(--muted);font-size:13px;margin-top:4px}
+.primary{border:0;background:var(--accent);color:#06110d;padding:11px 16px;border-radius:9px;font-weight:850;cursor:pointer}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:13px;padding:18px}
+.card .label{font-size:12px;color:var(--muted);margin-bottom:10px}.value{font-size:25px;font-weight:850}.profit{color:var(--accent)}.loss{color:var(--danger)}
+.grid{display:grid;grid-template-columns:1.4fr .8fr;gap:18px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:13px;padding:19px;margin-bottom:18px}
+.panel h2{font-size:16px;margin-bottom:15px}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}
+.field label{display:block;color:var(--muted);font-size:11px;margin-bottom:6px}
+.field input,.field select{width:100%;background:#0a0e14;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:10px;outline:none}
+.field input:focus,.field select:focus{border-color:var(--accent)}
+.full{grid-column:1/-1}
+.calc{background:#0a1110;border:1px solid #183d31;border-radius:10px;padding:14px;display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+.calc strong{font-size:22px;color:var(--accent)}
+.actions{display:flex;gap:8px;margin-top:14px}.secondary,.danger-btn{border:1px solid var(--border);background:var(--panel2);color:var(--text);padding:10px 14px;border-radius:8px;cursor:pointer}.danger-btn{color:var(--danger)}
+.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{padding:12px 9px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}.table th{color:var(--muted);font-size:11px;font-weight:700}.mini-actions button{border:0;background:transparent;color:var(--muted);cursor:pointer;margin-right:8px}.mini-actions button:hover{color:var(--text)}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}.filters input,.filters select{background:#0a0e14;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:9px}
+.report-row{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border);font-size:13px}.report-row span:first-child{color:var(--muted)}
+.empty{color:var(--muted);padding:30px 0;text-align:center;font-size:13px}
+.page{display:none}.page.active{display:block}
+.mobile-menu{display:none}
+@media(max-width:900px){
+ .sidebar{width:100%;height:auto;position:sticky;top:0;display:flex;align-items:center;padding:10px;gap:10px;border-right:0;border-bottom:1px solid var(--border)}
+ .logo{font-size:20px}.tag{display:none}.nav{display:flex;overflow:auto;flex:1}.nav button{white-space:nowrap;width:auto;padding:9px}.main{margin-left:0;width:100%;padding:17px}.app{display:block}
+ .cards{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.topbar h1{font-size:23px}
+}
+@media(max-width:500px){.cards{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.card{padding:14px}.value{font-size:21px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div>
+    <div class="logo">HIS<span>AAB</span></div>
+    <div class="tag">FREE FIRE SCRIMS MANAGER</div>
+  </div>
+  <nav class="nav">
+    <button class="active" data-page="dashboard">Dashboard</button>
+    <button data-page="add">+ Add Hisaab</button>
+    <button data-page="history">Hisaab History</button>
+    <button data-page="reports">Reports</button>
+  </nav>
+</aside>
+
+<main class="main">
+<section id="dashboard" class="page active">
+  <div class="topbar"><div><h1>Dashboard</h1><div class="subtitle" id="todayText"></div></div><button class="primary" onclick="showPage('add')">+ Add Hisaab</button></div>
+  <div class="cards">
+    <div class="card"><div class="label">TODAY'S COLLECTION</div><div class="value" id="todayCollection">₹0</div></div>
+    <div class="card"><div class="label">TODAY'S EXPENSES</div><div class="value" id="todayExpense">₹0</div></div>
+    <div class="card"><div class="label">TODAY'S PROFIT</div><div class="value profit" id="todayProfit">₹0</div></div>
+    <div class="card"><div class="label">TODAY'S MATCHES</div><div class="value" id="todayMatches">0</div></div>
+  </div>
+  <div class="grid">
+    <div class="panel"><h2>Today's Hisaab</h2><div id="todayTable"></div></div>
+    <div class="panel"><h2>Quick Summary</h2><div id="quickSummary"></div></div>
+  </div>
+</section>
+
+<section id="add" class="page">
+  <div class="topbar"><div><h1 id="formTitle">Add Hisaab</h1><div class="subtitle">Record one scrim/lobby's complete financial details.</div></div></div>
+  <div class="panel">
+    <form id="hisaabForm">
+      <input type="hidden" id="editId">
+      <div class="form-grid">
+        <div class="field"><label>DATE</label><input type="date" id="date" required></div>
+        <div class="field"><label>TIME</label><input type="time" id="time" required></div>
+        <div class="field full"><label>LOBBY / MATCH NAME</label><input type="text" id="match" placeholder="Example: 12 PM Lobby" required></div>
+        <div class="field"><label>TOTAL SLOTS</label><input type="number" id="slots" min="0" placeholder="12"></div>
+        <div class="field"><label>ENTRY FEE (₹)</label><input type="number" id="entry" min="0" step="0.01" placeholder="25"></div>
+        <div class="field"><label>TOTAL COLLECTION (₹)</label><input type="number" id="collection" min="0" step="0.01" placeholder="300" required></div>
+        <div class="field"><label>PRIZE POOL / PAYOUT (₹)</label><input type="number" id="prize" min="0" step="0.01" value="0"></div>
+        <div class="field"><label>HOST EXPENSE (₹)</label><input type="number" id="host" min="0" step="0.01" value="0"></div>
+        <div class="field"><label>PT MAKER EXPENSE (₹)</label><input type="number" id="pt" min="0" step="0.01" value="0"></div>
+        <div class="field"><label>OTHER EXPENSE (₹)</label><input type="number" id="other" min="0" step="0.01" value="0"></div>
+        <div class="field full"><label>NOTE (OPTIONAL)</label><input type="text" id="note" placeholder="Any extra information"></div>
+      </div>
+      <div class="calc"><span>NET PROFIT</span><strong id="liveProfit">₹0</strong></div>
+      <div class="actions"><button class="primary" type="submit" id="saveBtn">Save Hisaab</button><button class="secondary" type="button" onclick="resetForm()">Clear</button></div>
+    </form>
+  </div>
+</section>
+
+<section id="history" class="page">
+  <div class="topbar"><div><h1>Hisaab History</h1><div class="subtitle">All recorded scrims.</div></div><button class="primary" onclick="showPage('add')">+ Add Hisaab</button></div>
+  <div class="panel">
+    <div class="filters"><input type="date" id="filterDate"><input type="month" id="filterMonth"><input type="text" id="search" placeholder="Search lobby..."><button class="secondary" onclick="clearFilters()">Clear</button></div>
+    <div id="historyTable"></div>
+  </div>
+</section>
+
+<section id="reports" class="page">
+  <div class="topbar"><div><h1>Reports</h1><div class="subtitle">Monthly financial overview.</div></div></div>
+  <div class="panel">
+    <div class="filters"><input type="month" id="reportMonth"></div>
+    <div class="cards" style="margin-top:10px">
+      <div class="card"><div class="label">COLLECTION</div><div class="value" id="reportCollection">₹0</div></div>
+      <div class="card"><div class="label">EXPENSES</div><div class="value" id="reportExpense">₹0</div></div>
+      <div class="card"><div class="label">PROFIT</div><div class="value profit" id="reportProfit">₹0</div></div>
+      <div class="card"><div class="label">MATCHES</div><div class="value" id="reportMatches">0</div></div>
+    </div>
+    <div id="expenseBreakdown"></div>
+  </div>
+</section>
+</main>
+</div>
+
+<script>
+const KEY='hisaab_ff_scrims_v1';
+let data=JSON.parse(localStorage.getItem(KEY)||'[]');
+
+const $=id=>document.getElementById(id);
+const money=n=>'₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2});
+const today=()=>new Date().toISOString().slice(0,10);
+function save(){localStorage.setItem(KEY,JSON.stringify(data));}
+function expenses(x){return +x.prize + +x.host + +x.pt + +x.other}
+function profit(x){return +x.collection-expenses(x)}
+
+function showPage(page){
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+ $(page).classList.add('active');
+ document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+ if(page==='dashboard') renderDashboard();
+ if(page==='history') renderHistory();
+ if(page==='reports') renderReport();
+}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>showPage(b.dataset.page));
+
+function setDefaults(){
+ $('date').value=today();
+ $('time').value=new Date().toTimeString().slice(0,5);
+ $('reportMonth').value=today().slice(0,7);
+}
+function resetForm(){
+ $('hisaabForm').reset(); $('editId').value=''; $('formTitle').textContent='Add Hisaab'; $('saveBtn').textContent='Save Hisaab';
+ $('date').value=today(); $('time').value=new Date().toTimeString().slice(0,5); updateLive();
+}
+function num(id){return +$(id).value||0}
+function updateLive(){
+ const p=num('collection')-(num('prize')+num('host')+num('pt')+num('other'));
+ $('liveProfit').textContent=money(p); $('liveProfit').className=p>=0?'':'loss';
+}
+['collection','prize','host','pt','other'].forEach(id=>$(id).addEventListener('input',updateLive));
+
+$('hisaabForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ const obj={id:$('editId').value||Date.now().toString(),date:$('date').value,time:$('time').value,match:$('match').value.trim(),
+ slots:num('slots'),entry:num('entry'),collection:num('collection'),prize:num('prize'),host:num('host'),pt:num('pt'),other:num('other'),note:$('note').value.trim()};
+ const i=data.findIndex(x=>x.id===obj.id); if(i>=0)data[i]=obj; else data.push(obj);
+ data.sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)); save(); resetForm(); showPage('history');
+});
+
+function renderDashboard(){
+ const t=today(), rows=data.filter(x=>x.date===t);
+ $('todayText').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+ const c=rows.reduce((s,x)=>s+x.collection,0), ex=rows.reduce((s,x)=>s+expenses(x),0);
+ $('todayCollection').textContent=money(c); $('todayExpense').textContent=money(ex); $('todayProfit').textContent=money(c-ex); $('todayMatches').textContent=rows.length;
+ $('todayTable').innerHTML=tableHTML(rows);
+ $('quickSummary').innerHTML=`
+  <div class="report-row"><span>Prize / Payout</span><b>${money(rows.reduce((s,x)=>s+x.prize,0))}</b></div>
+  <div class="report-row"><span>Host Expense</span><b>${money(rows.reduce((s,x)=>s+x.host,0))}</b></div>
+  <div class="report-row"><span>PT Maker</span><b>${money(rows.reduce((s,x)=>s+x.pt,0))}</b></div>
+  <div class="report-row"><span>Other Expense</span><b>${money(rows.reduce((s,x)=>s+x.other,0))}</b></div>
+  <div class="report-row"><span>Net Profit</span><b class="profit">${money(c-ex)}</b></div>`;
+}
+function tableHTML(rows){
+ if(!rows.length)return '<div class="empty">No hisaab recorded for this date.</div>';
+ return `<div class="table-wrap"><table class="table"><thead><tr><th>TIME</th><th>LOBBY</th><th>COLLECTION</th><th>EXPENSE</th><th>PROFIT</th></tr></thead><tbody>
+ ${rows.map(x=>`<tr><td>${x.time}</td><td>${esc(x.match)}</td><td>${money(x.collection)}</td><td>${money(expenses(x))}</td><td class="${profit(x)>=0?'profit':'loss'}">${money(profit(x))}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+
+function renderHistory(){
+ let rows=[...data];
+ const d=$('filterDate').value,m=$('filterMonth').value,q=$('search').value.toLowerCase().trim();
+ if(d)rows=rows.filter(x=>x.date===d); if(m)rows=rows.filter(x=>x.date.startsWith(m)); if(q)rows=rows.filter(x=>x.match.toLowerCase().includes(q));
+ if(!rows.length){$('historyTable').innerHTML='<div class="empty">No matching records.</div>';return}
+ $('historyTable').innerHTML=`<div class="table-wrap"><table class="table"><thead><tr><th>DATE</th><th>TIME</th><th>LOBBY</th><th>COLLECTION</th><th>EXPENSE</th><th>PROFIT</th><th>ACTION</th></tr></thead><tbody>
+ ${rows.map(x=>`<tr><td>${x.date}</td><td>${x.time}</td><td>${esc(x.match)}</td><td>${money(x.collection)}</td><td>${money(expenses(x))}</td><td class="${profit(x)>=0?'profit':'loss'}">${money(profit(x))}</td><td class="mini-actions"><button onclick="editItem('${x.id}')">Edit</button><button onclick="deleteItem('${x.id}')">Delete</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+['filterDate','filterMonth','search'].forEach(id=>$(id).addEventListener('input',renderHistory));
+function clearFilters(){$('filterDate').value='';$('filterMonth').value='';$('search').value='';renderHistory()}
+function editItem(id){
+ const x=data.find(a=>a.id===id);if(!x)return;
+ $('editId').value=x.id;$('date').value=x.date;$('time').value=x.time;$('match').value=x.match;$('slots').value=x.slots;$('entry').value=x.entry;$('collection').value=x.collection;$('prize').value=x.prize;$('host').value=x.host;$('pt').value=x.pt;$('other').value=x.other;$('note').value=x.note;
+ $('formTitle').textContent='Edit Hisaab';$('saveBtn').textContent='Update Hisaab';updateLive();showPage('add');
+}
+function deleteItem(id){
+ if(confirm('Delete this hisaab entry?')){data=data.filter(x=>x.id!==id);save();renderHistory();renderDashboard();renderReport();}
+}
+
+$('reportMonth').addEventListener('input',renderReport);
+function renderReport(){
+ const m=$('reportMonth').value||today().slice(0,7), rows=data.filter(x=>x.date.startsWith(m));
+ const c=rows.reduce((s,x)=>s+x.collection,0),ex=rows.reduce((s,x)=>s+expenses(x),0);
+ $('reportCollection').textContent=money(c);$('reportExpense').textContent=money(ex);$('reportProfit').textContent=money(c-ex);$('reportMatches').textContent=rows.length;
+ const sums=['prize','host','pt','other'].map(k=>[k,rows.reduce((s,x)=>s+x[k],0)]);
+ $('expenseBreakdown').innerHTML=`<h2 style="margin:22px 0 10px">Expense Breakdown</h2>`+sums.map(([k,v])=>`<div class="report-row"><span>${k==='pt'?'PT Maker':k.charAt(0).toUpperCase()+k.slice(1)}</span><b>${money(v)}</b></div>`).join('');
+}
+setDefaults(); updateLive(); renderDashboard();
+</script>
+</body>
+</html>
